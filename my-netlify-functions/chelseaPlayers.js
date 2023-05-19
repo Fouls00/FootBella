@@ -1,8 +1,8 @@
 const axios = require('axios');
 
-async function getPlayerStats(playerId) {
-  // Fetch player statistics from an endpoint
-  const response = await axios.get(`http://api.football-data.org/v4/players/${playerId}`, {
+async function getPersonStats(personId) {
+  // Fetch person statistics from an endpoint
+  const response = await axios.get(`http://api.football-data.org/v4/persons/{id}`, {
     headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' },
   });
   const data = response.data;
@@ -24,22 +24,22 @@ exports.handler = async function(event, context) {
     });
     const data = response.data;
 
-    // An array to hold all our player stats promises
-    const playerStatsPromises = [];
+    // An array to hold all our person stats promises
+    const personStatsPromises = [];
 
-    for (const player of data.squad) {
-      // For each player, get their stats and store the promise in our array
-      playerStatsPromises.push(getPlayerStats(player.id));
+    for (const person of data.squad) {
+      // For each person, get their stats and store the promise in our array
+      personStatsPromises.push(getPersonStats(person.id));
     }
 
-    // Wait for all player stats promises to resolve
-    const allPlayerStats = await Promise.all(playerStatsPromises);
+    // Wait for all person stats promises to resolve
+    const allPersonStats = await Promise.all(personStatsPromises);
 
-    // Combine the player names, ids, and stats into the final output
-    const players = data.squad.map((player, index) => `${player.position} - ${player.name} (${player.id}) - ${allPlayerStats[index].matches} / ${allPlayerStats[index].wins} / ...`);
+    // Combine the person names, ids, and stats into the final output
+    const persons = data.squad.map((person, index) => `${person.position} - ${person.name} (${person.id}) - ${allPersonStats[index].matches} / ${allPersonStats[index].wins} / ...`);
 
     const responseBody = {
-      fulfillmentText: players.join('\n'),
+      fulfillmentText: persons.join('\n'),
     };
 
     return { statusCode: 200, body: JSON.stringify(responseBody) };
