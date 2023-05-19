@@ -13,7 +13,7 @@ app.get("/getPlayers", async (req, res) => {
         let persons = teamData.data.squad;
 
         for(let person of persons){
-            personData = await axios.get(`https://api.football-data.org/v4/persons/${id}/matches`, {
+            personData = await axios.get(`https://api.football-data.org/v4/persons/${person.id}/matches`, { // changed 'id' to 'person.id'
                 headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
             });
 
