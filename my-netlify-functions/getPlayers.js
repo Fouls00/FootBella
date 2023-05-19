@@ -1,6 +1,8 @@
-const axios = require('axios');
+const axios = require("axios");
+const express = require("express");
+const app = express();
 
-exports.handler = async function(event, context) {
+app.get("/getPlayers", async (req, res) => {
     let teamData;
     let personData;
     let personsWithStats = [];
@@ -16,40 +18,28 @@ exports.handler = async function(event, context) {
             });
 
             let stats = personData.data.aggregations;
+            let personStats = {
+                name: person.name,
+                position: person.position,
+                matches: stats ? stats.matchesOnPitch : 'NA',
+                wins: stats ? stats.wins : 'NA',
+                goals: stats ? stats.goals : 'NA',
+                assists: stats ? stats.assists : 'NA',
+                yellowCards: stats ? stats.yellowCards : 'NA'
+            };
 
-            // Position mapping
-            let generalPosition;
-            if(person.position.includes("Back") || person.position.includes("Centre-Back")){
-                generalPosition = "Defender";
-            } else if(person.position.includes("Midfield")){
-                generalPosition = "Midfield";
-            } else if(person.position.includes("Wing") || person.position.includes("Forward")){
-                generalPosition = "Offence";
-            } else {
-                generalPosition = "GoalKeeper";
+            // Assign additional stats based on position
+            if (person.position === "Defender") {
+                personStats.dryMatches = stats ? stats.dryMatches : 'NA';
             }
 
-            personsWithStats.push({
-                name: person.name,
-                position: generalPosition,
-                matches: stats.matchesOnPitch,
-                goals: stats.goals,
-                assists: stats.assists,
-                yellowCards: stats.yellowCards
-            });
+            personsWithStats.push(personStats);
         }
     } catch (error) {
         console.error(`Error: ${error}`);
     }
 
-    // Fulfillment response for Dialogflow
-    // Must be a stringified version of the JSON object
-    let response = {
-      "fulfillmentText": JSON.stringify(personsWithStats),
-    };
+    res.send(personsWithStats);
+});
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(response)
-    };
-};
+app.listen(3000, () => console.log("Server is running..."));
