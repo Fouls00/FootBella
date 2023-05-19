@@ -6,17 +6,16 @@ exports.handler = async function(event, context) {
             headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' },
         });
         const data = response.data;
-        const players = data.squad.slice(0,10).map(player => `${player.position} - ${player.name}`);
+        const players = data.squad.slice(0,10).map(player => ({
+            text: {
+                text: [`${player.position} - ${player.name}`]
+            }
+        }));
+
         return { 
             statusCode: 200, 
             body: JSON.stringify({
-                fulfillmentMessages: [
-                    {
-                        text: {
-                            text: players
-                        }
-                    }
-                ]
+                fulfillmentMessages: players
             }) 
         }
     } catch (error) {
