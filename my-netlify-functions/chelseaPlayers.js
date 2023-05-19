@@ -4,23 +4,23 @@ const app = express();
 
 app.get("/getPlayers", async (req, res) => {
     let teamData;
-    let playerData;
-    let playersWithStats = [];
+    let personData;
+    let personsWithStats = [];
     try {
         teamData = await axios.get("https://api.football-data.org/v4/teams/61", {
             headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
         });
-        let players = teamData.data.squad;
+        let persons = teamData.data.squad;
 
-        for(let player of players){
-            playerData = await axios.get(`https://api.football-data.org/v4/persons/${player.id}/matches`, {
+        for(let person of persons){
+            personData = await axios.get(`https://api.football-data.org/v4/persons/${id}/matches`, {
                 headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
             });
 
-            let stats = playerData.data.aggregations;
-            playersWithStats.push({
-                name: player.name,
-                position: player.position,
+            let stats = personData.data.aggregations;
+            personsWithStats.push({
+                name: person.name,
+                position: person.position,
                 matches: stats.matchesOnPitch,
                 startingXI: stats.startingXI,
                 goals: stats.goals,
@@ -32,7 +32,7 @@ app.get("/getPlayers", async (req, res) => {
         console.error(`Error: ${error}`);
     }
 
-    res.send(playersWithStats);
+    res.send(personsWithStats);
 });
 
 app.listen(3000, () => console.log("Server is running..."));
