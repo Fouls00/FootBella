@@ -1,7 +1,3 @@
-const axios = require("axios");
-const express = require("express");
-const app = express();
-
 app.get("/getPlayers", async (req, res) => {
     let teamData;
     let personData;
@@ -13,16 +9,28 @@ app.get("/getPlayers", async (req, res) => {
         let persons = teamData.data.squad;
 
         for(let person of persons){
-            personData = await axios.get(`https://api.football-data.org/v4/persons/${person.id}/matches`, { // changed 'id' to 'person.id'
+            personData = await axios.get(`https://api.football-data.org/v4/persons/${person.id}/matches`, {
                 headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
             });
 
             let stats = personData.data.aggregations;
+
+            // Position mapping
+            let generalPosition;
+            if(person.position.includes("Back") || person.position.includes("Centre-Back")){
+                generalPosition = "Defender";
+            } else if(person.position.includes("Midfield")){
+                generalPosition = "Midfield";
+            } else if(person.position.includes("Wing") || person.position.includes("Forward")){
+                generalPosition = "Offence";
+            } else {
+                generalPosition = "GoalKeeper";
+            }
+
             personsWithStats.push({
                 name: person.name,
-                position: person.position,
+                position: generalPosition,
                 matches: stats.matchesOnPitch,
-                startingXI: stats.startingXI,
                 goals: stats.goals,
                 assists: stats.assists,
                 yellowCards: stats.yellowCards

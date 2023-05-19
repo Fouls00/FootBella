@@ -1,4 +1,4 @@
-const chelseaPlayersHandler = require('./chelseaPlayers');
+const chelseaPlayersHandler = require('./getPlayers');
 const teamStatsHandler = require('./teamStats');
 
 exports.handler = async function(event, context) {
