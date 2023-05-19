@@ -7,9 +7,23 @@ exports.handler = async function(event, context) {
         });
         const data = response.data;
         const players = data.squad.map(player => player.name);
-        return { statusCode: 200, body: JSON.stringify(players) };
+        const playersList = players.join(', ');
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                "fulfillmentText": "Here is the list of Chelsea players: " + playersList,
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [ playersList ]
+                        }
+                    }
+                ]
+            })
+        };
     } catch (error) {
         console.log(error);
-        return { statusCode: 500, body: JSON.stringify({ msg: error.message }) };
+        return { statusCode: 500, body: JSON.stringify({ msg: error.message }) }
     }
 };
