@@ -1,4 +1,6 @@
-app.get("/getPlayers", async (req, res) => {
+const axios = require('axios');
+
+exports.handler = async function(event, context) {
     let teamData;
     let personData;
     let personsWithStats = [];
@@ -40,7 +42,14 @@ app.get("/getPlayers", async (req, res) => {
         console.error(`Error: ${error}`);
     }
 
-    res.send(personsWithStats);
-});
+    // Fulfillment response for Dialogflow
+    // Must be a stringified version of the JSON object
+    let response = {
+      "fulfillmentText": JSON.stringify(personsWithStats),
+    };
 
-app.listen(3000, () => console.log("Server is running..."));
+    return {
+      statusCode: 200,
+      body: JSON.stringify(response)
+    };
+};

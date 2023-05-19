@@ -8,7 +8,7 @@ exports.handler = async function(event, context) {
   
   // Call the appropriate function based on the intent
   switch (intentName) {
-    case 'GetChelseaPlayers':
+    case 'GetPlayers':
       return await chelseaPlayersHandler.handler(event, context);
     case 'GetTeamStats':
       return await teamStatsHandler.handler(event, context);
