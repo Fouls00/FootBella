@@ -1,48 +1,38 @@
-const axios = require('axios');
+const axios = require("axios");
+const express = require("express");
+const app = express();
 
-async function getPlayerNames() {
+app.get("/getPlayers", async (req, res) => {
+    let teamData;
+    let playerData;
+    let playersWithStats = [];
     try {
-        const teamResponse = await axios.get('https://api.football-data.org/v4/teams/61', {
-            headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' },
+        teamData = await axios.get("https://api.football-data.org/v4/teams/61", {
+            headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
         });
-        const teamData = teamResponse.data;
+        let players = teamData.data.squad;
 
-        let players = [];
-
-        for (const player of teamData.squad) {
-            const playerResponse = await axios.get(`https://api.football-data.org/v4/persons/${player.id}`, {
-                headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' },
+        for(let player of players){
+            playerData = await axios.get(`https://api.football-data.org/v4/persons/${player.id}/matches`, {
+                headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
             });
-            const playerData = playerResponse.data;
 
-            let playerInfo = {
+            let stats = playerData.data.aggregations;
+            playersWithStats.push({
                 name: player.name,
                 position: player.position,
-                // Add or adjust these properties according to the actual structure of playerData
-                matches: playerData.matches,  
-                wins: playerData.wins,
-                cleanSheets: playerData.cleanSheets,
-                goals: playerData.goals,
-                assists: playerData.assists,
-                yellowCards: playerData.yellowCards,
-            };
-
-            players.push(playerInfo);
+                matches: stats.matchesOnPitch,
+                startingXI: stats.startingXI,
+                goals: stats.goals,
+                assists: stats.assists,
+                yellowCards: stats.yellowCards
+            });
         }
-
-        let messageText = players.map(player => `${player.position} - ${player.name}: Matches ${player.matches} / Wins ${player.wins} / Clean Sheets ${player.cleanSheets} / Goals ${player.goals} / Assists ${player.assists} / Yellow Cards ${player.yellowCards}`).join("\n");
-
-        return {
-            fulfillmentMessages: [{
-                text: {
-                    text: [messageText],
-                },
-            }],
-        };
     } catch (error) {
-        console.log(error);
-        return { fulfillmentText: "Error occurred while fetching player information." };
+        console.error(`Error: ${error}`);
     }
-};
 
-getPlayerNames();
+    res.send(playersWithStats);
+});
+
+app.listen(3000, () => console.log("Server is running..."));
