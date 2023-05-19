@@ -1,19 +1,16 @@
-const axios = require("axios");
-const express = require("express");
-const app = express();
+const axios = require('axios');
 
-app.get("/getPlayers", async (req, res) => {
-    let teamData;
-    let personData;
-    let personsWithStats = [];
+async function getPlayerStats() {
     try {
-        teamData = await axios.get("https://api.football-data.org/v4/teams/61", {
+        const teamData = await axios.get("https://api.football-data.org/v4/teams/61", {
             headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
         });
-        let persons = teamData.data.squad;
 
-        for(let person of persons){
-            personData = await axios.get(`https://api.football-data.org/v4/persons/${person.id}/matches`, {
+        let persons = teamData.data.squad;
+        let personsWithStats = [];
+
+        for (let person of persons) {
+            const personData = await axios.get(`https://api.football-data.org/v4/persons/${person.id}/matches`, {
                 headers: { 'X-Auth-Token': 'af7450c5fc3541c3aede6334e63cb695' }
             });
 
@@ -35,11 +32,16 @@ app.get("/getPlayers", async (req, res) => {
 
             personsWithStats.push(personStats);
         }
+
+        const responseBody = {
+            fulfillmentText: personsWithStats,
+        };
+
+        return { statusCode: 200, body: JSON.stringify(responseBody) };
     } catch (error) {
-        console.error(`Error: ${error}`);
+        console.log(error);
+        return { statusCode: 500, body: JSON.stringify({ msg: error.message }) };
     }
+}
 
-    res.send(personsWithStats);
-});
-
-app.listen(3000, () => console.log("Server is running..."));
+exports.handler = getPlayerStats;
